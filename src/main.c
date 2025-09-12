@@ -6,7 +6,7 @@
 
 #define QUOTECHAR '"'
 
-void process_string(char, FILE *);
+void process_string(FILE *);
 
 int main(int argc, char *argv[]) {
 	FILE *file_ptr = NULL;
@@ -26,8 +26,10 @@ int main(int argc, char *argv[]) {
 	while ((token=fgetc(file_ptr)) != EOF) {
 		if (isspace(token))
 			continue;
-		else if (token == QUOTECHAR)
-			process_string(token, file_ptr);
+		else if (token == QUOTECHAR) {
+			putchar(token);
+			process_string(file_ptr);
+		}
 		else
 			putchar(token);
 	}
@@ -41,9 +43,13 @@ Precondition: token is a double quotation mark.
 Postcondition: A closing double quotation marks has been encountered.
 Invarient: None
 */
-void process_string(char token, FILE *file_ptr) {
-	do
+void process_string(FILE *file_ptr) {
+	int token;
+	do {
+		if (token == EOF) {
+			return;
+		}
 		putchar(token);
-	while ((token = fgetc(file_ptr)) != QUOTECHAR);
+	} while ((token = fgetc(file_ptr)) != QUOTECHAR);
 	putchar(token); // Print the last quote symbol
 }
