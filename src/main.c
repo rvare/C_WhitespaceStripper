@@ -3,6 +3,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <string.h>
+#include <errno.h>
 
 #define DOUBLE_QUOTECHAR '\"'
 #define SINGLE_QUOTECHAR '\''
@@ -14,13 +15,13 @@ int main(int argc, char *argv[]) {
 	char token;
 
 	if (argc == 1) {
-		fprintf(stderr, "ERROR: No file given\n");
+		fprintf(stderr, "ERROR with command arguments: No file given\n");
 		return 1;
 	}
 
 	file_ptr = fopen(argv[1], "r");
 	if (file_ptr == NULL) {
-		fprintf(stderr, "ERROR: %s\n", strerror(errno));
+		perror("ERROR opening file");
 		return 1;
 	}
 	
@@ -35,7 +36,12 @@ int main(int argc, char *argv[]) {
 			putchar(token);
 	}
 
-	return EXIT_SUCCESS;
+	if (ferror(file_ptr))
+		perror("ERROR with file");
+
+	fclose(file_ptr);
+
+	return 0;
 }
 
 /*
@@ -47,10 +53,9 @@ Invarient: None
 void process_string(char terminate_quote, FILE *file_ptr) {
 	int token;
 
-	while ((token = fgetc(file_ptr)) != terminate_quote) {
-		if (token == EOF) {
+	while ((token=fgetc(file_ptr)) != terminate_quote) {
+		if (feof(file_ptr) || token == EOF)
 			return;
-		}
 		putchar(token);
 	}
 	putchar(token); // Print the last quote symbol
