@@ -1,0 +1,10 @@
+{
+	"key": "item",
+	"another_key": "Another item",
+	"array": [
+		1,
+		2,
+		3
+	],
+	"long": "This is a really long line with characters and stuff\n"
+}
