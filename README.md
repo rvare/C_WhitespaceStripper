@@ -8,11 +8,11 @@ This program can also preserve whitespace within quoted strings as well.
 To use the program after compiling, do the following:
 
 ```bash
-./a.out <dir to file>
+./whtstrp.out <dir to file>
 ```
 
 It will output to `stdout`. To save output to a file, use the redirection operator `>`:
 
 ```bash
-./a.out <dir to file> > <dir to new file>
+./whtstrp.out <dir to file> > <dir to new file>
 ```
