@@ -40,6 +40,15 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 
+	if (strcmp(argv[1], "--version") == 0) {
+		printf("Whitespace Strirpper (aka whtstrp) Copyright (C) 2025 Richard Ernest Varela\n"
+				"License GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>\n"
+				"This program comes with ABSOLUTELY NO WARRANTY.\n"
+				"This is free software: you are free to change and redistribute it.\n"
+				);
+		return 0;
+	}
+
 	file_ptr = fopen(argv[1], "r");
 	if (file_ptr == NULL) {
 		perror("ERROR opening file");
