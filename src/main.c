@@ -32,8 +32,8 @@ void process_string(char, FILE *);
 
 int main(int argc, char *argv[]) {
 	FILE *file_ptr = NULL;
-	char token;
-	bool escape_flag = false;
+	register char token;
+	register bool escape_flag = false;
 
 	if (argc == 1) {
 		fprintf(stderr, "ERROR with command arguments: No file given\n");
@@ -67,8 +67,10 @@ int main(int argc, char *argv[]) {
 		escape_flag = (token == BACKSLASH_CHAR) ? true : false;
 	}
 
-	if (ferror(file_ptr))
+	if (ferror(file_ptr)) {
 		perror("ERROR with file");
+		return 1;
+	}
 
 	fclose(file_ptr);
 
