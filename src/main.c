@@ -29,6 +29,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 #define BACKSLASH_CHAR		'\\'
 
 void process_string(char, FILE *);
+void show_version();
 
 int main(int argc, char *argv[]) {
 	FILE *file_ptr = NULL;
@@ -41,11 +42,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	if (strcmp(argv[1], "--version") == 0) {
-		printf("Whitespace Strirpper (aka whtstrp) 1.0 Copyright (C) 2025 Richard Ernest Varela\n"
-				"License GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>\n"
-				"This program comes with ABSOLUTELY NO WARRANTY.\n"
-				"This is free software: you are free to change and redistribute it.\n"
-				);
+		show_version();
 		return 0;
 	}
 
@@ -78,7 +75,7 @@ int main(int argc, char *argv[]) {
 }
 
 /*
-Purpose: Handles the case when double quotation mark is encountered.
+Purpose: Handles the case when single or double quotation mark is encountered.
 Precondition: token is either a single or double quotation mark.
 Postcondition: A closing single or double quotation mark, not escaped, has been encountered.
 Invarient: None
@@ -94,4 +91,12 @@ void process_string(char terminate_quote, FILE *file_ptr) {
 		putchar(token);
 	}
 	putchar(token); // Print the last quote symbol
+}
+
+void show_version() {
+	printf(	"Whitespace Strirpper (aka whtstrp) 2.0 Copyright (C) 2026 Richard Ernest Varela\n"
+			"License GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>\n"
+			"This program comes with ABSOLUTELY NO WARRANTY.\n"
+			"This is free software: you are free to change and redistribute it.\n"
+			);
 }
