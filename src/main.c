@@ -28,11 +28,18 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 #define SINGLE_QUOTECHAR	'\''
 #define BACKSLASH_CHAR		'\\'
 
+typedef struct {
+	bool strip_tabs;
+	bool strip_newlines;
+} CmdFlags;
+
+void parse_cmd_args(char *argv, CmdFlags* cmd_flags);
 void process_string(char, FILE *);
 void show_version();
 
 int main(int argc, char *argv[]) {
 	FILE *file_ptr = NULL;
+	CmdFlags cmd_flags = {0};
 	register char token;
 	register bool escape_flag = false;
 
@@ -45,6 +52,9 @@ int main(int argc, char *argv[]) {
 		show_version();
 		return 0;
 	}
+
+	if (argv[1][0] == '-')
+		parse_cmd_args(argv[1], &cmd_flags);
 
 	file_ptr = fopen(argv[1], "r");
 	if (file_ptr == NULL) {
@@ -78,7 +88,7 @@ int main(int argc, char *argv[]) {
 Purpose: Handles the case when single or double quotation mark is encountered.
 Precondition: token is either a single or double quotation mark.
 Postcondition: A closing single or double quotation mark, not escaped, has been encountered.
-Invarient: None
+Invarient(s): None
 */
 void process_string(char terminate_quote, FILE *file_ptr) {
 	register int token;
@@ -99,4 +109,31 @@ void show_version() {
 			"This program comes with ABSOLUTELY NO WARRANTY.\n"
 			"This is free software: you are free to change and redistribute it.\n"
 			);
+}
+
+/*
+Purpose: Prases cmd args.
+Precondition: The address in cmd_flags points to a CmdFlags, and args points to argv[1] from main.
+Postcondition: all flags processed and booleans in cmd_flags could be set to true, or exit as failure on unrecognized arg.
+Invarient(s): None
+*/
+void parse_cmd_args(char *args, CmdFlags* cmd_flags) {
+	register size_t i = 1;
+	while (args[i] != '\0') {
+		switch (args[i]) {
+			case 'n':
+				printf("Strip new lines\n");
+				cmd_flags->strip_newlines = true;
+				break;
+			case 't':
+				printf("Strip tabs lines\n");
+				cmd_flags->strip_tabs = true;
+				break;
+			default:
+				printf("Unrecognized arg\n");
+				exit(EXIT_FAILURE);
+				break;
+		}
+		++i;
+	}
 }
