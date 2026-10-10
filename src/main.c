@@ -32,13 +32,15 @@ typedef struct {
 	bool custom_set;
 	bool strip_tabs;
 	bool strip_newlines;
+	bool strip_spaces;
 } CmdFlags;
 
-void parse_cmd_args(char *argv, CmdFlags* cmd_flags);
-void process_string(char, FILE *);
 void show_version();
+void show_help();
+void parse_cmd_args(char *argv, CmdFlags* cmd_flags);
 void strip_whitespace(FILE *);
 void custom_strip(FILE *, CmdFlags* cmd_flags);
+void process_string(char, FILE *);
 
 int main(int argc, char *argv[]) {
 	FILE *file_ptr = NULL;
@@ -51,6 +53,11 @@ int main(int argc, char *argv[]) {
 
 	if (strcmp(argv[1], "--version") == 0) {
 		show_version();
+		return 0;
+	}
+
+	if (strcmp(argv[1], "--help") == 0) {
+		show_help();
 		return 0;
 	}
 
@@ -78,30 +85,25 @@ int main(int argc, char *argv[]) {
 	return 0;
 }
 
-/*
-Purpose: Handles the case when single or double quotation mark is encountered.
-Precondition: token is either a single or double quotation mark.
-Postcondition: A closing single or double quotation mark, not escaped, has been encountered.
-Invarient(s): None
-*/
-void process_string(char terminate_quote, FILE *file_ptr) {
-	register int token;
-	register bool escape_flag = false;
-
-	while ((token=fgetc(file_ptr)) != terminate_quote || escape_flag == true) {
-		if (feof(file_ptr) || token == EOF)
-			return;
-		escape_flag = (token == BACKSLASH_CHAR) ? true : false;
-		putchar(token);
-	}
-	putchar(token); // Print the last quote symbol
-}
-
+/* Show version and copyright information when --version is used. */
 void show_version() {
-	printf(	"Whitespace Strirpper (aka whtstrp) 2.0 Copyright (C) 2026 Richard Ernest Varela\n"
+	puts(	"Whitespace Strirpper (aka whtstrp) 2.0 Copyright (C) 2026 Richard Ernest Varela\n"
 			"License GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>\n"
 			"This program comes with ABSOLUTELY NO WARRANTY.\n"
-			"This is free software: you are free to change and redistribute it.\n"
+			"This is free software: you are free to change and redistribute it."
+			);
+}
+
+/* Display help information when --version is used. */
+void show_help() {
+	puts(	"Usage: whtstrp [OPTION] [FILE]\n"
+			"Strips whitespaces characters from FILE, and prints the results to standard output.\n\n"
+			"Options:\n"
+			"    -n         strip newline characters\n"
+			"    -s         strip space characters\n"
+			"    -t         strip tab characters\n"
+			"    --help     display this help and exit\n"
+			"    --version  output version information and exit"
 			);
 }
 
@@ -116,12 +118,13 @@ void parse_cmd_args(char *args, CmdFlags* cmd_flags) {
 	while (args[i] != '\0') {
 		switch (args[i]) {
 			case 'n':
-				printf("Strip new lines\n");
 				cmd_flags->strip_newlines = true;
 				break;
 			case 't':
-				printf("Strip tabs lines\n");
 				cmd_flags->strip_tabs = true;
+				break;
+			case 's':
+				cmd_flags->strip_spaces = true;
 				break;
 			default:
 				printf("Unrecognized arg\n");
@@ -171,6 +174,8 @@ void custom_strip(FILE *file_ptr, CmdFlags *cmd_flags) {
 			continue;
 		else if (cmd_flags->strip_tabs && token == '\t')
 			continue;
+		else if (cmd_flags->strip_spaces && token == ' ')
+			continue;
 		else if ((token == SINGLE_QUOTECHAR || token == DOUBLE_QUOTECHAR) && escape_flag == false) {
 			putchar(token);
 			process_string(token, file_ptr);
@@ -179,4 +184,23 @@ void custom_strip(FILE *file_ptr, CmdFlags *cmd_flags) {
 			putchar(token);
 		escape_flag = (token == BACKSLASH_CHAR) ? true : false;
 	}
+}
+
+/*
+Purpose: Handles the case when single or double quotation mark is encountered.
+Precondition: token is either a single or double quotation mark.
+Postcondition: A closing single or double quotation mark, not escaped, has been encountered.
+Invarient(s): None
+*/
+void process_string(char terminate_quote, FILE *file_ptr) {
+	register int token;
+	register bool escape_flag = false;
+
+	while ((token=fgetc(file_ptr)) != terminate_quote || escape_flag == true) {
+		if (feof(file_ptr) || token == EOF)
+			return;
+		escape_flag = (token == BACKSLASH_CHAR) ? true : false;
+		putchar(token);
+	}
+	putchar(token); // Print the last quote symbol
 }
