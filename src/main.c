@@ -51,17 +51,7 @@ int main(int argc, char *argv[]) {
 		fprintf(stderr, "ERROR with command arguments: No file given\n");
 		return 1;
 	}
-/*
-	if (strcmp(argv[1], "--version") == 0) {
-		show_version();
-		return 0;
-	}
 
-	if (strcmp(argv[1], "--help") == 0) {
-		show_help();
-		return 0;
-	}
-*/
 	if (argv[1][0] == '-')
 		parse_cmd_args(argv[1], &cmd_flags);
 
