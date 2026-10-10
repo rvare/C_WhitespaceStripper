@@ -1,7 +1,7 @@
 /*
 Whitespace Strirpper (aka whtstrp) A program that strips whitespace
 characters from a file.
-Copyright (C) 2025 Richard Ernest Varela <richardvare13@gmail.com>
+Copyright (C) 2026 Richard Ernest Varela <richardvare13@gmail.com>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -38,9 +38,9 @@ typedef struct {
 
 void show_version();
 void show_help();
-void parse_cmd_args(char *argv, CmdFlags* cmd_flags);
+void parse_cmd_args(char*, CmdFlags*);
 void strip_whitespace(FILE *);
-void custom_strip(FILE *, CmdFlags* cmd_flags);
+void custom_strip(FILE *, CmdFlags*);
 void process_string(char, FILE *);
 
 int main(int argc, char *argv[]) {
@@ -51,7 +51,7 @@ int main(int argc, char *argv[]) {
 		fprintf(stderr, "ERROR with command arguments: No file given\n");
 		return 1;
 	}
-
+/*
 	if (strcmp(argv[1], "--version") == 0) {
 		show_version();
 		return 0;
@@ -61,7 +61,7 @@ int main(int argc, char *argv[]) {
 		show_help();
 		return 0;
 	}
-
+*/
 	if (argv[1][0] == '-')
 		parse_cmd_args(argv[1], &cmd_flags);
 
@@ -112,12 +112,22 @@ void show_help() {
 /*
 Purpose: Prases cmd args.
 Precondition: The address in cmd_flags points to a CmdFlags, and args points to argv[1] from main.
-Postcondition: all flags processed and booleans in cmd_flags could be set to true, or exit as failure on unrecognized arg.
+Postcondition: all flags processed and booleans in cmd_flags could be set to true, or exit as
+	failure on unrecognized arg.
 Invarient(s): None
 */
 void parse_cmd_args(char *args, CmdFlags* cmd_flags) {
-	register size_t i = 1;
-	while (args[i] != '\0') {
+	if (strcmp(args, "--version") == 0) {
+		show_version();
+		exit(EXIT_SUCCESS);
+	}
+
+	if (strcmp(args, "--help") == 0) {
+		show_help();
+		exit(EXIT_SUCCESS);
+	}
+
+	for (register size_t i = 1; args[i] != '\0'; ++i) {
 		switch (args[i]) {
 			case 'n':
 				cmd_flags->strip_newlines = true;
@@ -136,7 +146,6 @@ void parse_cmd_args(char *args, CmdFlags* cmd_flags) {
 				exit(EXIT_FAILURE);
 				break;
 		}
-		++i;
 	}
 	cmd_flags->custom_set = true;
 }
@@ -166,7 +175,8 @@ void strip_whitespace(FILE *file_ptr) {
 
 /*
 Purpose: Custome whitespace stripping
-Precondition: file_ptr points to a valid file descriptor, and cmd_flags points to a CmdFlags structure.
+Precondition: file_ptr points to a valid file descriptor, and cmd_flags points to a CmdFlags
+	structure.
 Postcondition: All whitespace characters, as defined by cmd_flags, are ingnored.
 Invarient(s): file_ptr, cmd_flags.
 */
