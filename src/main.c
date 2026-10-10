@@ -29,6 +29,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 #define BACKSLASH_CHAR		'\\'
 
 typedef struct {
+	bool custom_set;
 	bool strip_tabs;
 	bool strip_newlines;
 } CmdFlags;
@@ -36,12 +37,12 @@ typedef struct {
 void parse_cmd_args(char *argv, CmdFlags* cmd_flags);
 void process_string(char, FILE *);
 void show_version();
+void strip_whitespace(FILE *);
+void custom_strip(FILE *, CmdFlags* cmd_flags);
 
 int main(int argc, char *argv[]) {
 	FILE *file_ptr = NULL;
 	CmdFlags cmd_flags = {0};
-	register char token;
-	register bool escape_flag = false;
 
 	if (argc == 1) {
 		fprintf(stderr, "ERROR with command arguments: No file given\n");
@@ -56,23 +57,16 @@ int main(int argc, char *argv[]) {
 	if (argv[1][0] == '-')
 		parse_cmd_args(argv[1], &cmd_flags);
 
-	file_ptr = fopen(argv[1], "r");
+	file_ptr = fopen(argv[argc-1], "r");
 	if (file_ptr == NULL) {
 		perror("ERROR opening file");
 		return 1;
 	}
-	
-	while ((token=fgetc(file_ptr)) != EOF) {
-		if (isspace(token))
-			continue;
-		else if ((token == SINGLE_QUOTECHAR || token == DOUBLE_QUOTECHAR) && escape_flag == false) {
-			putchar(token);
-			process_string(token, file_ptr);
-		}
-		else
-			putchar(token);
-		escape_flag = (token == BACKSLASH_CHAR) ? true : false;
-	}
+
+	if (cmd_flags.custom_set)
+		custom_strip(file_ptr, &cmd_flags);
+	else
+		strip_whitespace(file_ptr);
 
 	if (ferror(file_ptr)) {
 		perror("ERROR with file");
@@ -135,5 +129,54 @@ void parse_cmd_args(char *args, CmdFlags* cmd_flags) {
 				break;
 		}
 		++i;
+	}
+	cmd_flags->custom_set = true;
+}
+
+/*
+Purpose: Default whitespace stripping
+Precondition: file_ptr points to a valid file descriptor.
+Postcondition: All whitespace characters that isspace knows have been stripped.
+Invarient(s): file_ptr
+*/
+void strip_whitespace(FILE *file_ptr) {
+	register char token;
+	register bool escape_flag = false;
+
+	while ((token=fgetc(file_ptr)) != EOF) {
+		if (isspace(token))
+			continue;
+		else if ((token == SINGLE_QUOTECHAR || token == DOUBLE_QUOTECHAR) && escape_flag == false) {
+			putchar(token);
+			process_string(token, file_ptr);
+		}
+		else
+			putchar(token);
+		escape_flag = (token == BACKSLASH_CHAR) ? true : false;
+	}
+}
+
+/*
+Purpose: Custome whitespace stripping
+Precondition: file_ptr points to a valid file descriptor, and cmd_flags points to a CmdFlags structure.
+Postcondition: All whitespace characters, as defined by cmd_flags, are ingnored.
+Invarient(s): file_ptr, cmd_flags.
+*/
+void custom_strip(FILE *file_ptr, CmdFlags *cmd_flags) {
+	register char token;
+	register bool escape_flag = false;
+
+	while ((token=fgetc(file_ptr)) != EOF) {
+		if (cmd_flags->strip_newlines && token == '\n')
+			continue;
+		else if (cmd_flags->strip_tabs && token == '\t')
+			continue;
+		else if ((token == SINGLE_QUOTECHAR || token == DOUBLE_QUOTECHAR) && escape_flag == false) {
+			putchar(token);
+			process_string(token, file_ptr);
+		}
+		else
+			putchar(token);
+		escape_flag = (token == BACKSLASH_CHAR) ? true : false;
 	}
 }
