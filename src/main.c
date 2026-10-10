@@ -33,6 +33,7 @@ typedef struct {
 	bool strip_tabs;
 	bool strip_newlines;
 	bool strip_spaces;
+	bool strip_carriage_return;
 } CmdFlags;
 
 void show_version();
@@ -100,8 +101,9 @@ void show_help() {
 			"Strips whitespaces characters from FILE, and prints the results to standard output.\n\n"
 			"Options:\n"
 			"    -n         strip newline characters\n"
-			"    -s         strip space characters\n"
-			"    -t         strip tab characters\n"
+			"    -s         strip spaces\n"
+			"    -r         strip carriage returns\n"
+			"    -t         strip tabs\n"
 			"    --help     display this help and exit\n"
 			"    --version  output version information and exit"
 			);
@@ -125,6 +127,9 @@ void parse_cmd_args(char *args, CmdFlags* cmd_flags) {
 				break;
 			case 's':
 				cmd_flags->strip_spaces = true;
+				break;
+			case 'r':
+				cmd_flags->strip_carriage_return = true;
 				break;
 			default:
 				printf("Unrecognized arg\n");
@@ -175,6 +180,8 @@ void custom_strip(FILE *file_ptr, CmdFlags *cmd_flags) {
 		else if (cmd_flags->strip_tabs && token == '\t')
 			continue;
 		else if (cmd_flags->strip_spaces && token == ' ')
+			continue;
+		else if (cmd_flags->strip_carriage_return && token == '\r')
 			continue;
 		else if ((token == SINGLE_QUOTECHAR || token == DOUBLE_QUOTECHAR) && escape_flag == false) {
 			putchar(token);
