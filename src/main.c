@@ -1,5 +1,5 @@
 /*
-Whitespace Strirpper (aka whtstrp) A program that strips whitespace
+Whitespace Strirpper (aka whtstrp) v2 A program that strips whitespace
 characters from a file.
 Copyright (C) 2026 Richard Ernest Varela <richardvare13@gmail.com>
 
@@ -17,23 +17,22 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>. 
 */
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
 #include <ctype.h>
-#include <string.h>
 #include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
+#define BACKSLASH_CHAR		'\\'
 #define DOUBLE_QUOTECHAR	'\"'
 #define SINGLE_QUOTECHAR	'\''
-#define BACKSLASH_CHAR		'\\'
 
 typedef struct {
 	bool custom_set;
-	bool strip_tabs;
+	bool strip_carriage_return;
 	bool strip_newlines;
 	bool strip_spaces;
-	bool strip_carriage_return;
+	bool strip_tabs;
 } CmdFlags;
 
 void show_version();
@@ -48,8 +47,8 @@ int main(int argc, char *argv[]) {
 	CmdFlags cmd_flags = {0};
 
 	if (argc == 1) {
-		fprintf(stderr, "ERROR with command arguments: No file given\n");
-		return 1;
+		fprintf(stderr, "ERROR: No arguments given. See --help for details.\n");
+		return EXIT_FAILURE;
 	}
 
 	if (argv[1][0] == '-')
@@ -58,7 +57,7 @@ int main(int argc, char *argv[]) {
 	file_ptr = fopen(argv[argc-1], "r");
 	if (file_ptr == NULL) {
 		perror("ERROR opening file");
-		return 1;
+		return EXIT_FAILURE;
 	}
 
 	if (cmd_flags.custom_set)
@@ -66,19 +65,19 @@ int main(int argc, char *argv[]) {
 	else
 		strip_whitespace(file_ptr);
 
-	if (ferror(file_ptr)) {
-		perror("ERROR with file");
-		return 1;
-	}
-
 	fclose(file_ptr);
 
-	return 0;
+	if (ferror(file_ptr)) {
+		perror("ERROR closing file");
+		return EXIT_FAILURE;
+	}
+
+	return EXIT_SUCCESS;
 }
 
 /* Show version and copyright information when --version is used. */
 void show_version() {
-	puts(	"Whitespace Strirpper (aka whtstrp) 2.0 Copyright (C) 2026 Richard Ernest Varela\n"
+	puts(	"Whitespace Strirpper (aka whtstrp) v2 Copyright (C) 2026 Richard Ernest Varela\n"
 			"License GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>\n"
 			"This program comes with ABSOLUTELY NO WARRANTY.\n"
 			"This is free software: you are free to change and redistribute it."
@@ -91,11 +90,11 @@ void show_help() {
 			"Strips whitespaces characters from FILE, and prints the results to standard output.\n\n"
 			"Options:\n"
 			"    -n         strip newline characters\n"
-			"    -s         strip spaces\n"
 			"    -r         strip carriage returns\n"
+			"    -s         strip spaces\n"
 			"    -t         strip tabs\n"
 			"    --help     display this help and exit\n"
-			"    --version  output version information and exit"
+			"    --version  output version and copyright information, then exits"
 			);
 }
 
@@ -122,21 +121,22 @@ void parse_cmd_args(char *args, CmdFlags* cmd_flags) {
 			case 'n':
 				cmd_flags->strip_newlines = true;
 				break;
-			case 't':
-				cmd_flags->strip_tabs = true;
+			case 'r':
+				cmd_flags->strip_carriage_return = true;
 				break;
 			case 's':
 				cmd_flags->strip_spaces = true;
 				break;
-			case 'r':
-				cmd_flags->strip_carriage_return = true;
+			case 't':
+				cmd_flags->strip_tabs = true;
 				break;
 			default:
-				printf("Unrecognized arg\n");
+				puts("Unrecognized arg\n");
 				exit(EXIT_FAILURE);
 				break;
 		}
 	}
+
 	cmd_flags->custom_set = true;
 }
 
@@ -161,6 +161,11 @@ void strip_whitespace(FILE *file_ptr) {
 			putchar(token);
 		escape_flag = (token == BACKSLASH_CHAR) ? true : false;
 	}
+
+	if (ferror(file_ptr)) {
+		perror("ERROR with file");
+		exit(EXIT_FAILURE);
+	}
 }
 
 /*
@@ -177,11 +182,11 @@ void custom_strip(FILE *file_ptr, CmdFlags *cmd_flags) {
 	while ((token=fgetc(file_ptr)) != EOF) {
 		if (cmd_flags->strip_newlines && token == '\n')
 			continue;
-		else if (cmd_flags->strip_tabs && token == '\t')
+		else if (cmd_flags->strip_carriage_return && token == '\r')
 			continue;
 		else if (cmd_flags->strip_spaces && token == ' ')
 			continue;
-		else if (cmd_flags->strip_carriage_return && token == '\r')
+		else if (cmd_flags->strip_tabs && token == '\t')
 			continue;
 		else if ((token == SINGLE_QUOTECHAR || token == DOUBLE_QUOTECHAR) && escape_flag == false) {
 			putchar(token);
@@ -190,6 +195,11 @@ void custom_strip(FILE *file_ptr, CmdFlags *cmd_flags) {
 		else
 			putchar(token);
 		escape_flag = (token == BACKSLASH_CHAR) ? true : false;
+	}
+
+	if (ferror(file_ptr)) {
+		perror("ERROR with file");
+		exit(EXIT_FAILURE);
 	}
 }
 
