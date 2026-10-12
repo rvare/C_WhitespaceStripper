@@ -26,6 +26,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 #define BACKSLASH_CHAR		'\\'
 #define DOUBLE_QUOTECHAR	'\"'
 #define SINGLE_QUOTECHAR	'\''
+#define LEFT_ANGLE_BRACKET	'<'
+#define RIGHT_ANGLE_BRACKET	'>'
 
 typedef struct {
 	bool custom_set;
@@ -40,6 +42,7 @@ void show_help();
 void parse_cmd_args(char*, CmdFlags*);
 void strip_whitespace(FILE *);
 void custom_strip(FILE *, CmdFlags*);
+void process_angle_brackets(FILE *);
 void process_string(char, FILE *);
 
 int main(int argc, char *argv[]) {
@@ -157,6 +160,10 @@ void strip_whitespace(FILE *file_ptr) {
 			putchar(token);
 			process_string(token, file_ptr);
 		}
+		else if (token == LEFT_ANGLE_BRACKET) {
+			putchar(token);
+			process_angle_brackets(file_ptr);
+		}
 		else
 			putchar(token);
 		escape_flag = (token == BACKSLASH_CHAR) ? true : false;
@@ -192,6 +199,10 @@ void custom_strip(FILE *file_ptr, CmdFlags *cmd_flags) {
 			putchar(token);
 			process_string(token, file_ptr);
 		}
+		else if (token == LEFT_ANGLE_BRACKET) {
+			putchar(token);
+			process_angle_brackets(file_ptr);
+		}
 		else
 			putchar(token);
 		escape_flag = (token == BACKSLASH_CHAR) ? true : false;
@@ -201,6 +212,30 @@ void custom_strip(FILE *file_ptr, CmdFlags *cmd_flags) {
 		perror("ERROR with file");
 		exit(EXIT_FAILURE);
 	}
+}
+
+/*
+Purpose: Handles the case when angle brackets are encountered.
+Precondition: token is a left angle bracket '<'.
+Postcondition: A closing right angle bracket '>' is encountered.
+Invarient(s): None
+*/
+void process_angle_brackets(FILE *file_ptr) {
+	register int token;
+	register bool escape_flag = false;
+
+	while ((token=fgetc(file_ptr)) != RIGHT_ANGLE_BRACKET) {
+		if (feof(file_ptr) || token == EOF)
+			return;
+		else if ((token == SINGLE_QUOTECHAR || token == DOUBLE_QUOTECHAR) && escape_flag == false) {
+			putchar(token);
+			process_string(token, file_ptr);
+		}
+		else
+			putchar(token);
+		escape_flag = (token == BACKSLASH_CHAR) ? true : false;
+	}
+	putchar(token); // Print right angle bracket
 }
 
 /*
