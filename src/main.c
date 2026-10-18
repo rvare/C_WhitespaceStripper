@@ -101,6 +101,7 @@ void show_help() {
 			"    -r         strip carriage returns\n"
 			"    -s         strip spaces\n"
 			"    -t         strip tabs\n"
+			"    -x         strip whitespace characters for XML like formats (all other flags ignored)\n"
 			"    --help     display this help and exit\n"
 			"    --version  output version and copyright information, then exits"
 			);
@@ -233,7 +234,7 @@ void process_xml_format(FILE *file_ptr) {
 
 	while ((token=fgetc(file_ptr)) != EOF) {
 		if (token == '<') {
-			if (prev == ' ') {
+			if (prev == ' ') { // Prevents unnecesary spaces after process chars.
 				fflush(file_ptr);
 				putchar('\b');
 				prev = '\0';
@@ -290,11 +291,11 @@ Precondition: token is either a single or double quotation mark.
 Postcondition: A closing single or double quotation mark, not escaped, has been encountered.
 Invarient(s): None
 */
-void process_string(char terminate_quote, FILE *file_ptr) {
+void process_string(char ending_quote, FILE *file_ptr) {
 	register int token;
 	register bool escape_flag = false;
 
-	while ((token=fgetc(file_ptr)) != terminate_quote || escape_flag == true) {
+	while ((token=fgetc(file_ptr)) != ending_quote || escape_flag == true) {
 		if (feof(file_ptr) || token == EOF)
 			return;
 		escape_flag = (token == BACKSLASH_CHAR) ? true : false;
