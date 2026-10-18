@@ -1,0 +1,18 @@
+<html>
+	<head>
+		<title>This is a title</title>
+		<meta name="description" content="This is some content.">
+	</head>
+	<body>
+		<p>This is a line of text.</p>
+
+		<p>
+			Multi-line paragraph.
+			More text of the paragarph.
+		</p>
+
+		<p>
+            This paragarph had spaces for indentation.
+		</p>
+	</body>
+</html>
