@@ -1,5 +1,5 @@
 /*
-Whitespace Strirpper (aka whtstrp) v2 A program that strips whitespace
+Whitespace Strirpper (aka whtstrp) v2 A program that strips white-space
 characters from a file.
 Copyright (C) 2026 Richard Ernest Varela <richardvare13@gmail.com>
 
@@ -96,13 +96,13 @@ void show_version() {
 /* Display help information when --version is used. */
 void show_help() {
 	puts(	"Usage: whtstrp [OPTION] [FILE]\n"
-			"Strips whitespaces characters from FILE, and prints the results to standard output.\n\n"
+			"Strips white-space characters from FILE, and prints the results to standard output.\n\n"
 			"Options:\n"
 			"    -n         strip newline characters\n"
 			"    -r         strip carriage returns\n"
 			"    -s         strip spaces\n"
 			"    -t         strip tabs\n"
-			"    -x         strip whitespace characters for XML like formats (all other flags ignored)\n"
+			"    -x         strip white-space characters for XML like formats (all other flags ignored)\n"
 			"    --help     display this help and exit\n"
 			"    --version  output version and copyright information, then exits"
 			);
@@ -154,9 +154,9 @@ void parse_cmd_args(char *args, CmdFlags* cmd_flags) {
 }
 
 /*
-Purpose: Default whitespace stripping
+Purpose: Default white-space stripping
 Precondition: file_ptr points to a valid file descriptor.
-Postcondition: All whitespace characters that isspace knows have been stripped.
+Postcondition: All white-space characters that isspace knows have been stripped.
 Invarient(s): file_ptr
 */
 void strip_whitespace(FILE *file_ptr) {
@@ -170,10 +170,6 @@ void strip_whitespace(FILE *file_ptr) {
 			putchar(token);
 			process_string(token, file_ptr);
 		}
-		else if (token == LEFT_ANGLE_BRACKET) {
-			putchar(token);
-			process_angle_brackets(file_ptr);
-		}
 		else
 			putchar(token);
 		escape_flag = (token == BACKSLASH_CHAR) ? true : false;
@@ -186,10 +182,10 @@ void strip_whitespace(FILE *file_ptr) {
 }
 
 /*
-Purpose: Custome whitespace stripping
+Purpose: Custome white-space stripping
 Precondition: file_ptr points to a valid file descriptor, and cmd_flags points to a CmdFlags
 	structure.
-Postcondition: All whitespace characters, as defined by cmd_flags, are ingnored.
+Postcondition: All white-space characters, as defined by cmd_flags, are ingnored.
 Invarient(s): file_ptr, cmd_flags.
 */
 void custom_strip(FILE *file_ptr, CmdFlags *cmd_flags) {
@@ -227,7 +223,7 @@ void custom_strip(FILE *file_ptr, CmdFlags *cmd_flags) {
 /*
 Purpose: Handles XML and XML like formats.
 Precondition: xml_format in cmd_flags set to true.
-Postcondition: All whitespace characters, except for those between <> and alpha-numeric characters.
+Postcondition: All white-space characters, except for those between <> and alpha-numeric characters.
 Invarient(s): file_ptr.
 */
 void process_xml_format(FILE *file_ptr) {
