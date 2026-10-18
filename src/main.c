@@ -35,6 +35,7 @@ typedef struct {
 	bool strip_newlines;
 	bool strip_spaces;
 	bool strip_tabs;
+	bool xml_format;
 } CmdFlags;
 
 void show_version();
@@ -42,6 +43,7 @@ void show_help();
 void parse_cmd_args(char*, CmdFlags*);
 void strip_whitespace(FILE *);
 void custom_strip(FILE *, CmdFlags*);
+void process_xml_format(FILE *);
 void process_angle_brackets(FILE *);
 void process_string(char, FILE *);
 
@@ -64,7 +66,10 @@ int main(int argc, char *argv[]) {
 	}
 
 	if (cmd_flags.custom_set)
-		custom_strip(file_ptr, &cmd_flags);
+		if (cmd_flags.xml_format)
+			process_xml_format(file_ptr);
+		else
+			custom_strip(file_ptr, &cmd_flags);
 	else
 		strip_whitespace(file_ptr);
 
@@ -132,6 +137,9 @@ void parse_cmd_args(char *args, CmdFlags* cmd_flags) {
 				break;
 			case 't':
 				cmd_flags->strip_tabs = true;
+				break;
+			case 'x':
+				cmd_flags->xml_format = true;
 				break;
 			default:
 				puts("Unrecognized arg\n");
@@ -206,6 +214,44 @@ void custom_strip(FILE *file_ptr, CmdFlags *cmd_flags) {
 		else
 			putchar(token);
 		escape_flag = (token == BACKSLASH_CHAR) ? true : false;
+	}
+
+	if (ferror(file_ptr)) {
+		perror("ERROR with file");
+		exit(EXIT_FAILURE);
+	}
+}
+
+/*
+Purpose: Handles XML and XML like formats.
+Precondition: xml_format in cmd_flags set to true.
+Postcondition: All whitespace characters, except for those between <> and alpha-numeric characters.
+Invarient(s): None
+*/
+void process_xml_format(FILE *file_ptr) {
+	register int token, prev;
+
+	while ((token=fgetc(file_ptr)) != EOF) {
+		if (token == '<') {
+			if (prev == ' ') {
+				fflush(file_ptr);
+				putchar('\b');
+				prev = '\0';
+			}
+			putchar(token);
+			process_angle_brackets(file_ptr);
+		}
+		else if (isalnum(token)) {
+			putchar(token);
+			while ((token=fgetc(file_ptr)) != '\n' && token != EOF) {
+				putchar(token);
+				prev = token;
+			}
+			if (prev != '>' && token != EOF) {
+				putchar(' ');
+				prev = ' ';
+			}
+		}
 	}
 
 	if (ferror(file_ptr)) {
