@@ -28,6 +28,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 #define SINGLE_QUOTECHAR	'\''
 #define LEFT_ANGLE_BRACKET	'<'
 #define RIGHT_ANGLE_BRACKET	'>'
+#define SPACE_CHAR			' '
 
 typedef struct {
 	bool custom_set;
@@ -112,7 +113,7 @@ Purpose: Prases cmd args.
 Precondition: The address in cmd_flags points to a CmdFlags, and args points to argv[1] from main.
 Postcondition: all flags processed and booleans in cmd_flags could be set to true, or exit as
 	failure on unrecognized arg.
-Invarient(s): None
+Invarient(s): args.
 */
 void parse_cmd_args(char *args, CmdFlags* cmd_flags) {
 	if (strcmp(args, "--version") == 0) {
@@ -143,7 +144,7 @@ void parse_cmd_args(char *args, CmdFlags* cmd_flags) {
 				cmd_flags->xml_format = true;
 				break;
 			default:
-				puts("Unrecognized arg\n");
+				fputs("Unrecognized argument\n", stderr);
 				exit(EXIT_FAILURE);
 				break;
 		}
@@ -200,7 +201,7 @@ void custom_strip(FILE *file_ptr, CmdFlags *cmd_flags) {
 			continue;
 		else if (cmd_flags->strip_carriage_return && token == '\r')
 			continue;
-		else if (cmd_flags->strip_spaces && token == ' ')
+		else if (cmd_flags->strip_spaces && token == SPACE_CHAR)
 			continue;
 		else if (cmd_flags->strip_tabs && token == '\t')
 			continue;
@@ -227,14 +228,14 @@ void custom_strip(FILE *file_ptr, CmdFlags *cmd_flags) {
 Purpose: Handles XML and XML like formats.
 Precondition: xml_format in cmd_flags set to true.
 Postcondition: All whitespace characters, except for those between <> and alpha-numeric characters.
-Invarient(s): None
+Invarient(s): file_ptr.
 */
 void process_xml_format(FILE *file_ptr) {
 	register int token, prev;
 
 	while ((token=fgetc(file_ptr)) != EOF) {
-		if (token == '<') {
-			if (prev == ' ') { // Prevents unnecesary spaces after process chars.
+		if (token == LEFT_ANGLE_BRACKET) {
+			if (prev == SPACE_CHAR) { // Prevents unnecesary spaces after process chars.
 				fflush(file_ptr);
 				putchar('\b');
 				prev = '\0';
@@ -248,9 +249,9 @@ void process_xml_format(FILE *file_ptr) {
 				putchar(token);
 				prev = token;
 			}
-			if (prev != '>' && token != EOF) {
-				putchar(' ');
-				prev = ' ';
+			if (prev != RIGHT_ANGLE_BRACKET && token != EOF) {
+				putchar(SPACE_CHAR);
+				prev = SPACE_CHAR;
 			}
 		}
 	}
@@ -265,7 +266,7 @@ void process_xml_format(FILE *file_ptr) {
 Purpose: Handles the case when angle brackets are encountered.
 Precondition: token is a left angle bracket '<'.
 Postcondition: A closing right angle bracket '>' is encountered.
-Invarient(s): None
+Invarient(s): file_ptr.
 */
 void process_angle_brackets(FILE *file_ptr) {
 	register int token;
@@ -289,7 +290,7 @@ void process_angle_brackets(FILE *file_ptr) {
 Purpose: Handles the case when single or double quotation mark is encountered.
 Precondition: token is either a single or double quotation mark.
 Postcondition: A closing single or double quotation mark, not escaped, has been encountered.
-Invarient(s): None
+Invarient(s): ending_quote, file_ptr.
 */
 void process_string(char ending_quote, FILE *file_ptr) {
 	register int token;
