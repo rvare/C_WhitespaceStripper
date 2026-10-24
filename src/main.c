@@ -53,7 +53,7 @@ int main(int argc, char *argv[]) {
 	CmdFlags cmd_flags = {0};
 
 	if (argc == 1) {
-		fprintf(stderr, "ERROR: No arguments given. See --help for details.\n");
+		fputs("ERROR: No arguments given. See --help for details.\n", stderr);
 		return EXIT_FAILURE;
 	}
 

@@ -36,6 +36,9 @@ You can, however, customize what white-space characters you want to remove by sp
 
 To build `whtstrp`, simply run `make`.
 
+Note that the `makefile` assumes you're using `gcc` as your C compiler.
+If you're using a different compiler, go into the `makefile` and change the `CC` variable to your specific compiler.
+
 ## Contributing
 
 If you find any issues, or feel an enhancement can be made, create an issue on GitHub, and use an appropriate tag along with it.
